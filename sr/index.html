@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    <title>Contagem Regressiva | Sr. Unplugged</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-deep: #050505;
+            --accent: #00ffcc;
+            --liquid-color: rgba(0, 255, 204, 0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-deep);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+        }
+
+        /* --- Liquid Glass Background --- */
+        .liquid-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 50% 50%, #111, #000);
+        }
+
+        .blob {
+            position: absolute;
+            width: 800px; height: 800px;
+            background: radial-gradient(circle, var(--liquid-color) 0%, transparent 70%);
+            filter: blur(80px);
+            border-radius: 50%;
+            animation: moveBlob 25s infinite alternate ease-in-out;
+        }
+
+        @keyframes moveBlob {
+            0% { transform: translate(-20%, -20%); }
+            100% { transform: translate(30%, 20%); }
+        }
+
+        /* --- Conteúdo Original --- */
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile {
+            position: relative;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .face {
+            width: 100%;
+            display: block;
+            /* Analog Horror / Kenophobia Filter */
+            filter: grayscale(20%) brightness(50%) contrast(250%) sepia(60%) hue-rotate(300deg) invert(5%);
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
+        }
+
+        .glasses {
+            position: absolute;
+            top: 38%; 
+            left: 16%;
+            width: 68%;
+            container-type: inline-size;
+        }
+
+        .glasses-img {
+            width: 100%;
+            display: block;
+            filter: drop-shadow(0 15px 15px rgba(0,0,0,0.9));
+        }
+
+        .lens {
+            position: absolute;
+            top: 15%;
+            height: 60%;
+            width: 38%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .left-lens { left: 8%; }
+        .right-lens { right: 8%; }
+
+        .lens span {
+            color: var(--accent);
+            font-weight: bold;
+            font-size: 8.5cqi;
+            text-shadow: 0 0 12px rgba(0, 255, 204, 0.7);
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 15px;
+            color: var(--accent);
+            font-size: 14px;
+            letter-spacing: 1px;
+            opacity: 0.8;
+            text-shadow: 0 0 5px rgba(0, 255, 204, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="liquid-bg">
+        <div class="blob"></div>
+    </div>
+
+    <div class="container">
+        <div class="profile">
+            <img class="face" src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=600&h=800&fit=crop" alt="Vazio Espacial Kenofobia">
+            
+            <div class="glasses">
+                <img class="glasses-img" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Sunglasses.svg/1024px-Sunglasses.svg.png" alt="cosmonauta esteve aqui">
+                
+                <div class="lens left-lens">
+                    <span id="timer-left">00d 00h</span>
+                </div>
+                <div class="lens right-lens">
+                    <span id="timer-right">00m 00s</span>
+                </div>
+                
+                <div class="footer-text">
+                    <span>nobody home, Sr.</span><br>
+                    <span style="font-size: 10px;">em breve na sua playlist</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Alvo: 16 de Abril às 08:00
+        const now = new Date();
+        let targetYear = now.getFullYear();
+        
+        // Se já passamos do horário neste ano, foca no próximo
+        if (now.getMonth() > 3 || (now.getMonth() === 3 && (now.getDate() > 16 || (now.getDate() === 16 && now.getHours() >= 8)))) {
+            targetYear++;
+        }
+        
+        const targetDate = new Date(targetYear, 3, 16, 8, 0, 0).getTime();
+
+        const timerInterval = setInterval(() => {
+            const currentTime = new Date().getTime();
+            const distance = targetDate - currentTime;
+
+            if (distance <= 0) {
+                clearInterval(timerInterval);
+                return;
+            }
+
+            document.getElementById('timer-left').textContent = 
+                String(Math.floor(distance / (1000 * 60 * 60 * 24))).padStart(2, '0') + "d " + 
+                String(Math.floor((distance / (1000 * 60 * 60)) % 24)).padStart(2, '0') + "h";
+
+            document.getElementById('timer-right').textContent = 
+                String(Math.floor((distance / 1000 / 60) % 60)).padStart(2, '0') + "m " + 
+                String(Math.floor((distance / 1000) % 60)).padStart(2, '0') + "s";
+        }, 1000);
+    </script>
+</body>
+</html>
